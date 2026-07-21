@@ -54,7 +54,7 @@
   }
 
   function currentHeader(backAction = 'go-home') {
-    return `<header class="page-head"><button class="icon" data-action="${backAction}" aria-label="戻る">‹</button><div><h1>${esc(APP.name)}</h1></div></header>`;
+    return `<header class="page-head"><button class="icon" data-action="${backAction}" aria-label="戻る">‹</button><img class="brand-mark" src="icons/icon.svg" alt=""><div><h1>${esc(APP.name)}</h1></div></header>`;
   }
   function alertHtml() { return `${state.error ? `<p class="error" role="alert">${esc(state.error)}</p>` : ''}${state.message ? `<p class="notice" role="status">${esc(state.message)}</p>` : ''}`; }
   function render() {
@@ -69,7 +69,7 @@
   function renderHome(app) {
     const q = normalize(state.query);
     const recipes = state.recipes.filter(recipe => !state.favoriteOnly || recipe.favorite).filter(recipe => !q || normalize(recipe.title).includes(q) || normalize(recipe.ingredients).includes(q));
-    app.innerHTML = `<header class="page-head"><div><h1>${esc(APP.name)}</h1><p class="subtitle">料理中のための、端末内だけのレシピ帳</p></div></header>${alertHtml()}
+    app.innerHTML = `<header class="page-head"><img class="brand-mark" src="icons/icon.svg" alt=""><div><h1>${esc(APP.name)}</h1><p class="subtitle">料理中のための、端末内だけのレシピ帳</p></div></header>${alertHtml()}
       <input class="search" id="search" type="search" autocomplete="off" placeholder="料理名・材料で検索" value="${esc(state.query)}" aria-label="料理名・材料で検索">
       <div class="toolbar"><button data-action="import-home">txt・mdを取り込む</button><button data-action="backup">JSONバックアップ</button><button data-action="restore">JSON復元</button><button class="primary" data-action="new">＋ 新規作成</button></div>
       <div class="filter-row"><label><input type="checkbox" id="favorite-filter" ${state.favoriteOnly ? 'checked' : ''}> お気に入りだけ</label><span>${recipes.length} 件</span></div>
