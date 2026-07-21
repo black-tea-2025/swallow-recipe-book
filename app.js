@@ -67,15 +67,35 @@
     bindCommon(); app.focus({ preventScroll:true });
   }
   function renderHome(app) {
-    const q = normalize(state.query);
-    const recipes = state.recipes.filter(recipe => !state.favoriteOnly || recipe.favorite).filter(recipe => !q || normalize(recipe.title).includes(q) || normalize(recipe.ingredients).includes(q));
     app.innerHTML = `<header class="page-head"><img class="brand-mark" src="icons/icon.svg" alt=""><div><h1>${esc(APP.name)}</h1><p class="subtitle">料理中のための、端末内だけのレシピ帳</p></div></header>${alertHtml()}
       <input class="search" id="search" type="search" autocomplete="off" placeholder="料理名・材料で検索" value="${esc(state.query)}" aria-label="料理名・材料で検索">
       <div class="toolbar"><button data-action="import-home">txt・mdを取り込む</button><button data-action="backup">JSONバックアップ</button><button data-action="restore">JSON復元</button><button class="primary" data-action="new">＋ 新規作成</button></div>
-      <div class="filter-row"><label><input type="checkbox" id="favorite-filter" ${state.favoriteOnly ? 'checked' : ''}> お気に入りだけ</label><span>${recipes.length} 件</span></div>
-      <section class="recipe-list">${recipes.length ? recipes.map(recipe => `<button class="recipe-card" data-open="${recipe.id}"><span class="recipe-meta"><span class="recipe-title">${esc(recipe.title)}</span>${recipe.servings ? `<span class="recipe-serving">${esc(recipe.servings)}</span>` : ''}</span>${recipe.favorite ? '<span class="star" aria-label="お気に入り">★</span>' : ''}</button>`).join('') : '<p class="empty">まだレシピがない。新規作成かファイル取り込みから始めよう。</p>'}</section>`;
-    $('#search').addEventListener('input', event => { state.query = event.target.value; renderHome(app); $('#search').focus(); });
-    $('#favorite-filter').addEventListener('change', event => { state.favoriteOnly = event.target.checked; render(); });
+      <div class="filter-row"><label><input type="checkbox" id="favorite-filter" ${state.favoriteOnly ? 'checked' : ''}> お気に入りだけ</label><span id="recipe-count"></span></div>
+      <section class="recipe-list" id="recipe-list"></section>`;
+    updateHomeResults();
+    $('#search').addEventListener('input', event => { state.query = event.target.value; updateHomeResults(); });
+    $('#favorite-filter').addEventListener('change', event => { state.favoriteOnly = event.target.checked; updateHomeResults(); });
+    $('#recipe-list').addEventListener('click', event => {
+      const button = event.target.closest('[data-open]');
+      if (!button) return;
+      state.currentId = button.dataset.open; state.tab = 'ingredients'; state.message=''; state.error=''; state.view='view'; render();
+    });
+  }
+  function filteredRecipes() {
+    const q = normalize(state.query);
+    return state.recipes
+      .filter(recipe => !state.favoriteOnly || recipe.favorite)
+      .filter(recipe => !q || normalize(recipe.title).includes(q) || normalize(recipe.ingredients).includes(q));
+  }
+  function homeResultsHtml(recipes) {
+    return recipes.length ? recipes.map(recipe => `<button class="recipe-card" data-open="${recipe.id}"><span class="recipe-meta"><span class="recipe-title">${esc(recipe.title)}</span>${recipe.servings ? `<span class="recipe-serving">${esc(recipe.servings)}</span>` : ''}</span>${recipe.favorite ? '<span class="star" aria-label="お気に入り">★</span>' : ''}</button>`).join('') : '<p class="empty">まだレシピがない。新規作成かファイル取り込みから始めよう。</p>';
+  }
+  function updateHomeResults() {
+    const recipes = filteredRecipes();
+    const count = $('#recipe-count'); const list = $('#recipe-list');
+    if (!count || !list) return;
+    count.textContent = `${recipes.length} 件`;
+    list.innerHTML = homeResultsHtml(recipes);
   }
   function renderView(app) {
     const recipe = current(); if (!recipe) { goHome(); return; }
@@ -124,7 +144,6 @@
     app.innerHTML = `${currentHeader('back-view')}<h2>旧版履歴</h2><p class="subtitle">保存時点の内容です。最大2件を保持します。</p><section class="history-list">${recipe.versions.length ? recipe.versions.map((version,index) => `<article class="history-card"><p>${esc(formatDate(version.savedAt))}</p><strong>${esc(version.title)}</strong><div class="action-row"><button data-action="show-version" data-index="${index}">内容を見る</button><button data-action="restore-version" data-index="${index}">この版を復元</button></div></article>`).join('') : '<p class="empty">まだ旧版はありません。</p>'}</section>`;
   }
   function bindCommon() {
-    document.querySelectorAll('[data-open]').forEach(button => button.addEventListener('click', () => { state.currentId = button.dataset.open; state.tab = 'ingredients'; state.message=''; state.error=''; state.view='view'; render(); }));
     document.querySelectorAll('[data-action]').forEach(button => button.addEventListener('click', () => action(button.dataset.action, button)));
     document.querySelectorAll('[data-tab]').forEach(button => button.addEventListener('click', () => switchTab(button.dataset.tab)));
   }
