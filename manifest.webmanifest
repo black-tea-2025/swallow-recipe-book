@@ -1,6 +1,6 @@
 {
-  "name": "レシピ帳",
-  "short_name": "レシピ帳",
+  "name": "燕のレシピ帳",
+  "short_name": "燕のレシピ帳",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f2f6f8",

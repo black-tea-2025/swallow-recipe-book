@@ -1,7 +1,7 @@
 /* レシピ帳: 依存関係なし、すべて端末内で完結する。 */
 (() => {
   'use strict';
-  const APP = { name: 'レシピ帳', dbName: 'swallow-recipe-book', dbVersion: 1 };
+  const APP = { name: '燕のレシピ帳', dbName: 'swallow-recipe-book', dbVersion: 1 };
   const $ = (selector, root = document) => root.querySelector(selector);
   const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[c]);
   const now = () => new Date().toISOString();
